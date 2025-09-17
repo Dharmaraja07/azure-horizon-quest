@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Zap, Shield, Sword, Heart, Users } from "lucide-react";
 import { useState } from "react";
+import { useCharacters, useCreateCharacter } from "@/hooks/useGameData";
 import kaiaImage from "@/assets/character-kaia.jpg";
 import ziroImage from "@/assets/character-ziro.jpg";
 
@@ -74,6 +75,23 @@ interface CharacterSelectionProps {
 
 export const CharacterSelection = ({ onBack }: CharacterSelectionProps) => {
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const { data: userCharacters = [] } = useCharacters();
+  const createCharacterMutation = useCreateCharacter();
+
+  const handleSelectCharacter = async () => {
+    if (!selectedCharacter) return;
+
+    await createCharacterMutation.mutateAsync({
+      character_id: selectedCharacter.id,
+      name: selectedCharacter.name,
+      strength: selectedCharacter.stats.strength,
+      agility: selectedCharacter.stats.agility,
+      defense: selectedCharacter.stats.defense,
+      energy: selectedCharacter.stats.energy,
+    });
+    
+    onBack();
+  };
 
   const getRarityColor = (rarity: Character["rarity"]) => {
     switch (rarity) {
@@ -109,6 +127,30 @@ export const CharacterSelection = ({ onBack }: CharacterSelectionProps) => {
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Character List */}
             <div className="xl:col-span-2">
+              {userCharacters.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-2xl font-bold mb-4">Your Characters</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {userCharacters.map((char) => (
+                      <Card key={char.id} className="bg-card/80 backdrop-blur-sm border-border/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="font-bold">{char.name}</h3>
+                              <p className="text-sm text-muted-foreground">Level {char.level}</p>
+                            </div>
+                            {char.is_active && (
+                              <Badge className="bg-accent text-accent-foreground">Active</Badge>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <h2 className="text-2xl font-bold mb-4">Available Characters</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {characters.map((character, index) => (
                   <Card
@@ -254,8 +296,13 @@ export const CharacterSelection = ({ onBack }: CharacterSelectionProps) => {
                         </div>
                       </div>
 
-                      <Button className="w-full anime-pulse" size="lg">
-                        Select This Character
+                      <Button 
+                        className="w-full anime-pulse" 
+                        size="lg"
+                        onClick={handleSelectCharacter}
+                        disabled={createCharacterMutation.isPending}
+                      >
+                        {createCharacterMutation.isPending ? "Creating..." : "Select This Character"}
                       </Button>
                     </div>
                   </CardContent>

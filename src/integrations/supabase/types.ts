@@ -14,7 +14,283 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      characters: {
+        Row: {
+          agility: number
+          character_id: string
+          created_at: string
+          defense: number
+          energy: number
+          experience: number
+          id: string
+          is_active: boolean
+          level: number
+          name: string
+          strength: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agility?: number
+          character_id: string
+          created_at?: string
+          defense?: number
+          energy?: number
+          experience?: number
+          id?: string
+          is_active?: boolean
+          level?: number
+          name: string
+          strength?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agility?: number
+          character_id?: string
+          created_at?: string
+          defense?: number
+          energy?: number
+          experience?: number
+          id?: string
+          is_active?: boolean
+          level?: number
+          name?: string
+          strength?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      crew_members: {
+        Row: {
+          agility: number
+          created_at: string
+          defense: number
+          energy: number
+          experience: number
+          id: string
+          is_active: boolean
+          level: number
+          name: string
+          recruitment_cost: number
+          role: string
+          specialty: string
+          strength: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agility?: number
+          created_at?: string
+          defense?: number
+          energy?: number
+          experience?: number
+          id?: string
+          is_active?: boolean
+          level?: number
+          name: string
+          recruitment_cost?: number
+          role: string
+          specialty: string
+          strength?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agility?: number
+          created_at?: string
+          defense?: number
+          energy?: number
+          experience?: number
+          id?: string
+          is_active?: boolean
+          level?: number
+          name?: string
+          recruitment_cost?: number
+          role?: string
+          specialty?: string
+          strength?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      islands: {
+        Row: {
+          coordinates: Json
+          created_at: string
+          description: string
+          id: string
+          is_discovered: boolean
+          level_requirement: number
+          name: string
+          resources: Json
+        }
+        Insert: {
+          coordinates?: Json
+          created_at?: string
+          description: string
+          id?: string
+          is_discovered?: boolean
+          level_requirement?: number
+          name: string
+          resources?: Json
+        }
+        Update: {
+          coordinates?: Json
+          created_at?: string
+          description?: string
+          id?: string
+          is_discovered?: boolean
+          level_requirement?: number
+          name?: string
+          resources?: Json
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          experience: number
+          gold: number
+          id: string
+          level: number
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          experience?: number
+          gold?: number
+          id?: string
+          level?: number
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          experience?: number
+          gold?: number
+          id?: string
+          level?: number
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      quests: {
+        Row: {
+          created_at: string
+          description: string
+          difficulty: string
+          id: string
+          is_story_quest: boolean
+          requirements: Json
+          reward_experience: number
+          reward_gold: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          difficulty: string
+          id?: string
+          is_story_quest?: boolean
+          requirements?: Json
+          reward_experience?: number
+          reward_gold?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          difficulty?: string
+          id?: string
+          is_story_quest?: boolean
+          requirements?: Json
+          reward_experience?: number
+          reward_gold?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      user_island_discoveries: {
+        Row: {
+          discovered_at: string
+          id: string
+          island_id: string
+          user_id: string
+        }
+        Insert: {
+          discovered_at?: string
+          id?: string
+          island_id: string
+          user_id: string
+        }
+        Update: {
+          discovered_at?: string
+          id?: string
+          island_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_island_discoveries_island_id_fkey"
+            columns: ["island_id"]
+            isOneToOne: false
+            referencedRelation: "islands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_quest_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          progress: Json
+          quest_id: string
+          started_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: Json
+          quest_id: string
+          started_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          progress?: Json
+          quest_id?: string
+          started_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_quest_progress_quest_id_fkey"
+            columns: ["quest_id"]
+            isOneToOne: false
+            referencedRelation: "quests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,76 +1,60 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, Plus, Star, Anchor, Crown } from "lucide-react";
+import { ArrowLeft, Users, Plus, Star, Sword, Shield, Zap, Heart, Coins } from "lucide-react";
 import { useState } from "react";
+import { useCrewMembers, useRecruitCrewMember, useProfile } from "@/hooks/useGameData";
 
-interface CrewMember {
+interface AvailableCrewMember {
   id: string;
   name: string;
   role: string;
-  level: number;
-  experience: number;
-  maxExperience: number;
   specialty: string;
-  loyalty: number;
-  status: "active" | "resting" | "training";
-  abilities: string[];
-  rarity: "common" | "rare" | "legendary";
+  cost: number;
+  description: string;
 }
 
-const crewMembers: CrewMember[] = [
+const availableRecruits: AvailableCrewMember[] = [
   {
-    id: "navigator",
-    name: "Marina Seacrest",
+    id: "navigator-1",
+    name: "Elena Stormwind",
     role: "Navigator",
-    level: 15,
-    experience: 750,
-    maxExperience: 1000,
     specialty: "Ocean Navigation",
-    loyalty: 95,
-    status: "active",
-    abilities: ["Chart Reading", "Weather Prediction", "Safe Passage"],
-    rarity: "legendary"
+    cost: 800,
+    description: "Expert navigator with knowledge of dangerous waters and hidden islands."
   },
   {
-    id: "cook",
-    name: "Chef Saltbeard",
-    role: "Ship's Cook",
-    level: 12,
-    experience: 400,
-    maxExperience: 800,
-    specialty: "Healing Cuisine",
-    loyalty: 88,
-    status: "active",
-    abilities: ["Energy Boost Meals", "Poison Cure", "Strength Food"],
-    rarity: "rare"
-  },
-  {
-    id: "gunner",
-    name: "Boom McGillicuddy",
-    role: "Master Gunner",
-    level: 18,
-    experience: 950,
-    maxExperience: 1200,
+    id: "gunner-1", 
+    name: "Drake Cannonball",
+    role: "Gunner",
     specialty: "Artillery Combat",
-    loyalty: 92,
-    status: "training",
-    abilities: ["Cannon Mastery", "Explosive Rounds", "Rapid Fire"],
-    rarity: "rare"
+    cost: 1000,
+    description: "Master gunner with exceptional aim and explosive expertise."
   },
   {
-    id: "mechanic",
+    id: "cook-1",
+    name: "Chef Marina",
+    role: "Cook",
+    specialty: "Healing Cuisine", 
+    cost: 600,
+    description: "Talented cook who can prepare meals that boost crew stats and morale."
+  },
+  {
+    id: "engineer-1",
     name: "Gears Ironwright",
-    role: "Ship Engineer",
-    level: 10,
-    experience: 200,
-    maxExperience: 600,
+    role: "Engineer",
     specialty: "Ship Maintenance",
-    loyalty: 78,
-    status: "resting",
-    abilities: ["Quick Repairs", "Engine Boost", "Defensive Systems"],
-    rarity: "common"
+    cost: 900,
+    description: "Skilled engineer who keeps your ship running at peak performance."
+  },
+  {
+    id: "lookout-1",
+    name: "Hawk Sharpeye",
+    role: "Lookout",
+    specialty: "Enemy Detection",
+    cost: 500,
+    description: "Sharp-eyed lookout who can spot threats and treasures from great distances."
   }
 ];
 
@@ -79,32 +63,18 @@ interface CrewManagementProps {
 }
 
 export const CrewManagement = ({ onBack }: CrewManagementProps) => {
-  const [selectedMember, setSelectedMember] = useState<CrewMember | null>(null);
+  const [selectedTab, setSelectedTab] = useState<"crew" | "recruit">("crew");
+  const { data: crewMembers = [] } = useCrewMembers();
+  const { data: profile } = useProfile();
+  const recruitMutation = useRecruitCrewMember();
 
-  const getRarityColor = (rarity: CrewMember["rarity"]) => {
-    switch (rarity) {
-      case "legendary": return "text-accent";
-      case "rare": return "text-primary";
-      default: return "text-muted-foreground";
-    }
-  };
-
-  const getStatusColor = (status: CrewMember["status"]) => {
-    switch (status) {
-      case "active": return "bg-green-500/20 text-green-400 border-green-500/30";
-      case "training": return "bg-blue-500/20 text-blue-400 border-blue-500/30";
-      case "resting": return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
-      default: return "bg-muted text-muted-foreground";
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "navigator": return <Anchor className="h-4 w-4" />;
-      case "master gunner": return <Star className="h-4 w-4" />;
-      case "ship engineer": return <Users className="h-4 w-4" />;
-      default: return <Crown className="h-4 w-4" />;
-    }
+  const handleRecruitMember = async (memberData: {
+    name: string;
+    role: string;
+    specialty: string;
+    recruitment_cost: number;
+  }) => {
+    await recruitMutation.mutateAsync(memberData);
   };
 
   return (
@@ -120,230 +90,175 @@ export const CrewManagement = ({ onBack }: CrewManagementProps) => {
               </Button>
               <h1 className="text-4xl font-bold anime-slide-up">Crew Management</h1>
             </div>
-            
-            <Button className="anime-pulse">
+
+            {profile && (
+              <div className="bg-black/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
+                <div className="text-sm">Gold: {profile.gold}</div>
+              </div>
+            )}
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-2 mb-8">
+            <Button
+              variant={selectedTab === "crew" ? "default" : "outline"}
+              onClick={() => setSelectedTab("crew")}
+            >
+              <Users className="h-4 w-4 mr-2" />
+              My Crew ({crewMembers.length})
+            </Button>
+            <Button
+              variant={selectedTab === "recruit" ? "default" : "outline"}
+              onClick={() => setSelectedTab("recruit")}
+            >
               <Plus className="h-4 w-4 mr-2" />
-              Recruit Member
+              Recruit Members
             </Button>
           </div>
 
-          {/* Crew Stats Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 anime-slide-up">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">4</div>
-                <div className="text-sm text-muted-foreground">Active Crew</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 anime-slide-up" style={{ animationDelay: "100ms" }}>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-accent">87%</div>
-                <div className="text-sm text-muted-foreground">Avg Loyalty</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 anime-slide-up" style={{ animationDelay: "200ms" }}>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-secondary">14</div>
-                <div className="text-sm text-muted-foreground">Avg Level</div>
-              </CardContent>
-            </Card>
-            
-            <Card className="bg-card/80 backdrop-blur-sm border-border/50 anime-slide-up" style={{ animationDelay: "300ms" }}>
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-primary">3</div>
-                <div className="text-sm text-muted-foreground">Ready for Quest</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Crew List */}
-            <div className="xl:col-span-2">
-              <div className="space-y-4">
+          <div className="space-y-6">
+            {/* Current Crew */}
+            {selectedTab === "crew" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {crewMembers.map((member, index) => (
-                  <Card
-                    key={member.id}
-                    className={`group cursor-pointer transition-epic hover:scale-[1.02] hover:shadow-glow border-border/50 bg-card/80 backdrop-blur-sm anime-slide-up ${
-                      selectedMember?.id === member.id ? "ring-2 ring-primary shadow-glow" : ""
-                    }`}
+                  <Card 
+                    key={member.id} 
+                    className="bg-card/80 backdrop-blur-sm border-border/50 hover:shadow-glow transition-epic anime-slide-up"
                     style={{ animationDelay: `${index * 100}ms` }}
-                    onClick={() => setSelectedMember(member)}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="gradient-ocean w-12 h-12 rounded-lg flex items-center justify-center">
-                            {getRoleIcon(member.role)}
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-bold group-hover:text-primary transition-smooth">
-                              {member.name}
-                            </h3>
-                            <p className="text-muted-foreground text-sm">{member.role}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Badge className={getStatusColor(member.status)} variant="outline">
-                            {member.status}
-                          </Badge>
-                          <div className="text-right">
-                            <div className="text-sm font-semibold">Level {member.level}</div>
-                            <div className={`text-xs ${getRarityColor(member.rarity)}`}>
-                              {member.rarity}
-                            </div>
-                          </div>
-                        </div>
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{member.name}</CardTitle>
+                        <Badge className="bg-primary text-primary-foreground">
+                          Active
+                        </Badge>
                       </div>
+                      <p className="text-sm text-muted-foreground">{member.role}</p>
+                    </CardHeader>
 
+                    <CardContent>
                       <div className="space-y-3">
-                        {/* Experience Bar */}
+                        {/* Level & Experience */}
                         <div>
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>Experience</span>
-                            <span>{member.experience}/{member.maxExperience}</span>
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span>Level {member.level}</span>
+                            <span>{member.experience}/{member.experience + 100} XP</span>
                           </div>
-                          <Progress 
-                            value={(member.experience / member.maxExperience) * 100} 
-                            className="h-2"
-                          />
+                          <Progress value={(member.experience / (member.experience + 100)) * 100} className="h-2" />
                         </div>
 
-                        {/* Loyalty Bar */}
-                        <div>
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>Loyalty</span>
-                            <span>{member.loyalty}%</span>
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="flex items-center gap-1">
+                            <Sword className="h-3 w-3 text-red-500" />
+                            <span>STR: {member.strength}</span>
                           </div>
-                          <Progress 
-                            value={member.loyalty} 
-                            className="h-2"
-                          />
+                          <div className="flex items-center gap-1">
+                            <Zap className="h-3 w-3 text-yellow-500" />
+                            <span>AGI: {member.agility}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Shield className="h-3 w-3 text-blue-500" />
+                            <span>DEF: {member.defense}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Heart className="h-3 w-3 text-green-500" />
+                            <span>VIT: {member.energy}</span>
+                          </div>
                         </div>
 
                         {/* Specialty */}
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">Specialty:</span>
-                          <Badge variant="secondary" className="text-xs">
-                            {member.specialty}
-                          </Badge>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Specialty:</p>
+                          <Badge variant="outline" className="text-xs">{member.specialty}</Badge>
                         </div>
 
-                        {/* Abilities Preview */}
-                        <div className="flex flex-wrap gap-1">
-                          {member.abilities.slice(0, 3).map((ability) => (
-                            <Badge key={ability} variant="outline" className="text-xs">
-                              {ability}
-                            </Badge>
-                          ))}
-                          {member.abilities.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{member.abilities.length - 3} more
-                            </Badge>
-                          )}
+                        {/* Actions */}
+                        <div className="flex gap-2 pt-2">
+                          <Button size="sm" variant="outline" className="flex-1">
+                            Train
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className={member.is_active ? "bg-primary/20" : ""}
+                          >
+                            {member.is_active ? "Active" : "Deploy"}
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
                 ))}
+
+                {crewMembers.length === 0 && (
+                  <div className="col-span-full text-center py-12">
+                    <Users className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
+                    <h3 className="text-lg font-semibold mb-2">No Crew Members</h3>
+                    <p className="text-muted-foreground mb-4">Start building your crew by recruiting new members!</p>
+                    <Button onClick={() => setSelectedTab("recruit")}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Recruit First Member
+                    </Button>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
-            {/* Member Details */}
-            <div className="xl:col-span-1">
-              {selectedMember ? (
-                <Card className="sticky top-8 bg-card/80 backdrop-blur-sm border-border/50 anime-fade-in">
-                  <CardContent className="p-6">
-                    <div className="text-center mb-6">
-                      <div className="gradient-ocean w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        {getRoleIcon(selectedMember.role)}
-                      </div>
-                      <h2 className="text-xl font-bold mb-1">{selectedMember.name}</h2>
-                      <p className="text-muted-foreground">{selectedMember.role}</p>
-                      <div className="flex items-center justify-center gap-2 mt-2">
-                        <Badge className={getStatusColor(selectedMember.status)} variant="outline">
-                          {selectedMember.status}
-                        </Badge>
-                      </div>
-                    </div>
+            {/* Recruitment */}
+            {selectedTab === "recruit" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {availableRecruits.map((member, index) => (
+                  <Card 
+                    key={member.id} 
+                    className="bg-card/80 backdrop-blur-sm border-border/50 hover:shadow-glow transition-epic anime-slide-up"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <CardHeader>
+                      <CardTitle className="text-lg">{member.name}</CardTitle>
+                      <p className="text-sm text-muted-foreground">{member.role}</p>
+                    </CardHeader>
 
-                    <div className="space-y-4">
-                      {/* Level & Experience */}
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-semibold">Level {selectedMember.level}</span>
-                          <span className={getRarityColor(selectedMember.rarity)}>
-                            {selectedMember.rarity}
-                          </span>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <p className="text-sm text-muted-foreground">
+                          {member.description}
+                        </p>
+
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Specialty:</p>
+                          <Badge variant="outline" className="text-xs">{member.specialty}</Badge>
                         </div>
-                        <Progress 
-                          value={(selectedMember.experience / selectedMember.maxExperience) * 100} 
-                          className="h-3"
-                        />
-                        <div className="text-xs text-muted-foreground mt-1">
-                          {selectedMember.experience}/{selectedMember.maxExperience} XP
-                        </div>
-                      </div>
 
-                      {/* Loyalty */}
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-semibold">Loyalty</span>
-                          <span className="text-sm">{selectedMember.loyalty}%</span>
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex items-center gap-1 text-lg font-bold text-yellow-500">
+                            <Coins className="h-4 w-4" />
+                            {member.cost}
+                          </div>
+                          <Badge variant="secondary">Available</Badge>
                         </div>
-                        <Progress value={selectedMember.loyalty} className="h-3" />
-                      </div>
 
-                      {/* Specialty */}
-                      <div>
-                        <h3 className="font-semibold mb-2">Specialty</h3>
-                        <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                          <p className="text-sm text-primary font-medium">
-                            {selectedMember.specialty}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* All Abilities */}
-                      <div>
-                        <h3 className="font-semibold mb-2">Abilities</h3>
-                        <div className="space-y-2">
-                          {selectedMember.abilities.map((ability) => (
-                            <div key={ability} className="p-2 rounded bg-muted/50 text-sm">
-                              {ability}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="space-y-2 pt-4">
-                        <Button className="w-full" variant="default">
-                          Train Member
-                        </Button>
-                        <Button className="w-full" variant="outline">
-                          Assign to Quest
-                        </Button>
-                        <Button className="w-full" variant="outline">
-                          Give Rest
+                        <Button 
+                          className="w-full" 
+                          disabled={recruitMutation.isPending || (profile && profile.gold < member.cost)}
+                          onClick={() => handleRecruitMember({
+                            name: member.name,
+                            role: member.role,
+                            specialty: member.specialty,
+                            recruitment_cost: member.cost
+                          })}
+                        >
+                          <Coins className="h-4 w-4 mr-2" />
+                          {recruitMutation.isPending ? "Recruiting..." : 
+                           profile && profile.gold < member.cost ? "Not enough gold" :
+                           `Recruit (${member.cost} Gold)`}
                         </Button>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <Card className="sticky top-8 bg-card/80 backdrop-blur-sm border-border/50">
-                  <CardContent className="p-6 text-center">
-                    <div className="text-muted-foreground">
-                      <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>Select a crew member to view details</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

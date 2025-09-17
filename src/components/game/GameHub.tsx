@@ -1,16 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ship, Users, Map, Settings, Trophy, Sword } from "lucide-react";
+import { Ship, Users, Map, Settings, Trophy, Sword, LogOut } from "lucide-react";
 import { CharacterSelection } from "./CharacterSelection";
 import { CrewManagement } from "./CrewManagement";
 import { QuestBrowser } from "./QuestBrowser";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useGameData";
 import heroImage from "@/assets/hero-banner.jpg";
 
 type GameSection = "hub" | "character" | "crew" | "quests" | "settings";
 
 export const GameHub = () => {
   const [activeSection, setActiveSection] = useState<GameSection>("hub");
+  const { signOut } = useAuth();
+  const { data: profile } = useProfile();
 
   const renderSection = () => {
     switch (activeSection) {
@@ -32,13 +36,31 @@ export const GameHub = () => {
               <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/50 to-background" />
               
               <div className="relative z-10 px-6 pt-20 pb-32">
+                {/* User Profile Section */}
+                <div className="absolute top-6 right-6 flex items-center gap-4">
+                  {profile && (
+                    <div className="bg-black/20 backdrop-blur-sm rounded-lg px-4 py-2 text-white">
+                      <div className="text-sm font-medium">{profile.username}</div>
+                      <div className="text-xs text-white/80">Level {profile.level} • {profile.gold} Gold</div>
+                    </div>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={signOut}
+                    className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
+
                 <div className="max-w-4xl mx-auto text-center">
                   <div className="anime-slide-up">
                     <h1 className="text-6xl md:text-8xl font-bold mb-6 text-white drop-shadow-2xl">
                       Ocean's Edge
                     </h1>
                     <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto drop-shadow-lg">
-                      Embark on an epic adventure across mystical islands. Build your crew, master legendary powers, and become the ultimate sea legend.
+                      Welcome back, {profile?.username || 'Captain'}! Continue your epic adventure across mystical islands.
                     </p>
                   </div>
                   
