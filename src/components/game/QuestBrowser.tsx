@@ -2,9 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Map, Clock, Trophy, Star, Coins, Zap } from "lucide-react";
+import { ArrowLeft, Map, Clock, Trophy, Star, Coins, Zap, X } from "lucide-react";
 import { useState } from "react";
 import { useQuests, useUserQuestProgress, useStartQuest } from "@/hooks/useGameData";
+import { useCompleteQuest, useAbandonQuest } from "@/hooks/useQuestSystem";
 
 type QuestCategory = "all" | "story" | "easy" | "medium" | "hard" | "legendary" | "available" | "completed";
 
@@ -17,6 +18,8 @@ export const QuestBrowser = ({ onBack }: QuestBrowserProps) => {
   const { data: quests = [] } = useQuests();
   const { data: questProgress = [] } = useUserQuestProgress();
   const startQuestMutation = useStartQuest();
+  const completeQuestMutation = useCompleteQuest();
+  const abandonQuestMutation = useAbandonQuest();
 
   const getQuestStatus = (questId: string) => {
     const progress = questProgress.find(p => p.quest_id === questId);
@@ -25,6 +28,14 @@ export const QuestBrowser = ({ onBack }: QuestBrowserProps) => {
 
   const handleStartQuest = async (questId: string) => {
     await startQuestMutation.mutateAsync(questId);
+  };
+
+  const handleCompleteQuest = async (questId: string) => {
+    await completeQuestMutation.mutateAsync(questId);
+  };
+
+  const handleAbandonQuest = async (questId: string) => {
+    await abandonQuestMutation.mutateAsync(questId);
   };
 
   const filteredQuests = quests.filter(quest => {
@@ -123,7 +134,25 @@ export const QuestBrowser = ({ onBack }: QuestBrowserProps) => {
                           <span>Progress</span>
                           <span>In Progress</span>
                         </div>
-                        <Progress value={50} className="h-2" />
+                        <Progress value={75} className="h-2" />
+                        <div className="flex gap-2 mt-3">
+                          <Button 
+                            size="sm" 
+                            onClick={() => handleCompleteQuest(quest.id)}
+                            disabled={completeQuestMutation.isPending}
+                          >
+                            Complete Quest
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleAbandonQuest(quest.id)}
+                            disabled={abandonQuestMutation.isPending}
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Abandon
+                          </Button>
+                        </div>
                       </div>
                     )}
 
@@ -143,14 +172,16 @@ export const QuestBrowser = ({ onBack }: QuestBrowserProps) => {
 
                     <Button 
                       className="w-full" 
-                      variant={status === "available" ? "default" : "outline"}
-                      disabled={status === "completed" || startQuestMutation.isPending}
+                      variant={status === "available" ? "default" : status === "completed" ? "secondary" : "outline"}
+                      disabled={status === "completed" || startQuestMutation.isPending || completeQuestMutation.isPending || abandonQuestMutation.isPending}
                       onClick={() => status === "available" && handleStartQuest(quest.id)}
                     >
-                      {startQuestMutation.isPending ? "Starting..." : 
+                      {startQuestMutation.isPending ? "Starting..." :
+                       completeQuestMutation.isPending ? "Completing..." :
+                       abandonQuestMutation.isPending ? "Abandoning..." :
                        status === "available" ? "Start Quest" :
                        status === "in_progress" ? "In Progress" :
-                       status === "completed" ? "Completed" : "Locked"}
+                       status === "completed" ? "✓ Completed" : "Locked"}
                     </Button>
                   </CardContent>
                 </Card>

@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ship, Users, Map, Settings, Trophy, Sword, LogOut } from "lucide-react";
+import { Ship, Users, Map, Settings as SettingsIcon, Trophy, Sword, LogOut } from "lucide-react";
 import { CharacterSelection } from "./CharacterSelection";
 import { CrewManagement } from "./CrewManagement";
 import { QuestBrowser } from "./QuestBrowser";
+import { TrainingGrounds } from "./TrainingGrounds";
+import { IslandExplorer } from "./IslandExplorer";
+import { Settings } from "./Settings";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useGameData";
 import heroImage from "@/assets/hero-banner.jpg";
 
-type GameSection = "hub" | "character" | "crew" | "quests" | "settings";
+type GameSection = "hub" | "character" | "crew" | "quests" | "training" | "islands" | "settings";
 
 export const GameHub = () => {
   const [activeSection, setActiveSection] = useState<GameSection>("hub");
@@ -24,6 +27,12 @@ export const GameHub = () => {
         return <CrewManagement onBack={() => setActiveSection("hub")} />;
       case "quests":
         return <QuestBrowser onBack={() => setActiveSection("hub")} />;
+      case "training":
+        return <TrainingGrounds onBack={() => setActiveSection("hub")} />;
+      case "islands":
+        return <IslandExplorer onBack={() => setActiveSection("hub")} />;
+      case "settings":
+        return <Settings onBack={() => setActiveSection("hub")} />;
       default:
         return (
           <div className="min-h-screen gradient-hero">
@@ -112,7 +121,7 @@ export const GameHub = () => {
                     title="Training Grounds"
                     description="Master combat techniques and special abilities"
                     icon={<Sword className="h-8 w-8" />}
-                    onClick={() => {}}
+                    onClick={() => setActiveSection("training")}
                     gradient="gradient-ocean"
                   />
                   
@@ -120,14 +129,14 @@ export const GameHub = () => {
                     title="Island Explorer"
                     description="Navigate mysterious seas and hidden treasures"
                     icon={<Map className="h-8 w-8" />}
-                    onClick={() => {}}
+                    onClick={() => setActiveSection("islands")}
                     gradient="gradient-sunset"
                   />
                   
                   <GameSectionCard
                     title="Settings"
                     description="Customize your gaming experience"
-                    icon={<Settings className="h-8 w-8" />}
+                    icon={<SettingsIcon className="h-8 w-8" />}
                     onClick={() => setActiveSection("settings")}
                     gradient="gradient-adventure"
                   />
