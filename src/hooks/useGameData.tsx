@@ -50,7 +50,7 @@ export interface Quest {
   difficulty: 'easy' | 'medium' | 'hard' | 'legendary';
   reward_experience: number;
   reward_gold: number;
-  requirements: any;
+  requirements: Record<string, unknown>;
   is_story_quest: boolean;
 }
 
@@ -59,7 +59,7 @@ export interface UserQuestProgress {
   user_id: string;
   quest_id: string;
   status: 'available' | 'in_progress' | 'completed' | 'failed';
-  progress: any;
+  progress: Record<string, unknown>;
   started_at?: string;
   completed_at?: string;
   quest?: Quest;
@@ -213,10 +213,10 @@ export const useCreateCharacter = () => {
         description: "Your legendary character has joined your crew.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Failed to create character",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     },
@@ -259,10 +259,10 @@ export const useRecruitCrewMember = () => {
         description: "A new member has joined your crew.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Failed to recruit crew member",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     },
@@ -299,10 +299,10 @@ export const useStartQuest = () => {
         description: "Your adventure begins now.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Failed to start quest",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     },

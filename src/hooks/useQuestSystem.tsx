@@ -66,10 +66,10 @@ export const useCompleteQuest = () => {
         description: `Gained ${data.rewards.experience} XP and ${data.rewards.gold} Gold${data.rewards.levelUp ? ' • LEVEL UP!' : ''}`,
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Failed to complete quest",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     },
@@ -105,10 +105,10 @@ export const useAbandonQuest = () => {
         description: "You can start this quest again later.",
       });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       toast({
         title: "Failed to abandon quest",
-        description: error.message,
+        description: error instanceof Error ? error.message : "An unknown error occurred",
         variant: "destructive",
       });
     },

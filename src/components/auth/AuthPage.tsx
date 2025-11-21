@@ -39,10 +39,21 @@ export const AuthPage = () => {
         title: "Welcome aboard, Captain!",
         description: "Check your email to confirm your account and start your adventure.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let errorMessage = "An unknown error occurred";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Check for network errors
+        if (error.message.includes("Failed to fetch") || error.message.includes("ERR_NAME_NOT_RESOLVED")) {
+          errorMessage = "Unable to connect to Supabase. Please check your internet connection and ensure your Supabase project is active. If using a free tier, your project may be paused - check your Supabase dashboard.";
+        }
+      }
+      
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -66,10 +77,21 @@ export const AuthPage = () => {
         title: "Welcome back, Captain!",
         description: "Setting sail for adventure...",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let errorMessage = "An unknown error occurred";
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Check for network errors
+        if (error.message.includes("Failed to fetch") || error.message.includes("ERR_NAME_NOT_RESOLVED")) {
+          errorMessage = "Unable to connect to Supabase. Please check your internet connection and ensure your Supabase project is active. If using a free tier, your project may be paused - check your Supabase dashboard.";
+        }
+      }
+      
       toast({
         title: "Login failed",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

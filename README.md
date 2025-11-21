@@ -32,7 +32,15 @@ cd <YOUR_PROJECT_NAME>
 # Step 3: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Set up environment variables (optional but recommended)
+# Create a .env file in the root directory with your Supabase credentials:
+# VITE_SUPABASE_URL=https://your-project-id.supabase.co
+# VITE_SUPABASE_ANON_KEY=your-anon-key-here
+# 
+# If you don't set these, the app will use default values, but it's recommended
+# to use your own Supabase project for production.
+
+# Step 5: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
