@@ -1,18 +1,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Ship, Users, Map, Settings as SettingsIcon, Trophy, Sword, LogOut } from "lucide-react";
+import { Ship, Users, Map, Settings as SettingsIcon, Trophy, Sword, LogOut, Zap } from "lucide-react";
 import { CharacterSelection } from "./CharacterSelection";
 import { CrewManagement } from "./CrewManagement";
 import { QuestBrowser } from "./QuestBrowser";
 import { TrainingGrounds } from "./TrainingGrounds";
 import { IslandExplorer } from "./IslandExplorer";
 import { Settings } from "./Settings";
+import { BattleArena } from "./BattleArena";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useGameData";
 import heroImage from "@/assets/hero-banner.jpg";
 
-type GameSection = "hub" | "character" | "crew" | "quests" | "training" | "islands" | "settings";
+type GameSection = "hub" | "character" | "crew" | "quests" | "training" | "islands" | "settings" | "battle";
 
 export const GameHub = () => {
   const [activeSection, setActiveSection] = useState<GameSection>("hub");
@@ -33,6 +34,8 @@ export const GameHub = () => {
         return <IslandExplorer onBack={() => setActiveSection("hub")} />;
       case "settings":
         return <Settings onBack={() => setActiveSection("hub")} />;
+      case "battle":
+        return <BattleArena onBack={() => setActiveSection("hub")} />;
       default:
         return (
           <div className="min-h-screen gradient-hero">
@@ -131,6 +134,14 @@ export const GameHub = () => {
                     icon={<Map className="h-8 w-8" />}
                     onClick={() => setActiveSection("islands")}
                     gradient="gradient-sunset"
+                  />
+                  
+                  <GameSectionCard
+                    title="Battle Arena"
+                    description="Epic anime-style combat against legendary foes"
+                    icon={<Zap className="h-8 w-8" />}
+                    onClick={() => setActiveSection("battle")}
+                    gradient="gradient-adventure"
                   />
                   
                   <GameSectionCard
